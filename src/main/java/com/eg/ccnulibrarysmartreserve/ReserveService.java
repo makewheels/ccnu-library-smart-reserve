@@ -8,6 +8,7 @@ import com.eg.ccnulibrarysmartreserve.bean.getseats.Data;
 import com.eg.ccnulibrarysmartreserve.bean.getseats.GetSeatsResponse;
 import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
@@ -19,13 +20,14 @@ import java.util.List;
 /**
  * 预约工具类
  */
-public class ReserveHelper {
+@Service
+public class ReserveService {
     /**
      * 一键登录获取cookie
      *
      * @return ASP.NET_SessionId=2cjfvrazvsouc245hrlytu55
      */
-    public HttpCookie getCookie(String username, String password) {
+    public HttpCookie loginAndGetCookie(String username, String password) {
         //获取account.ccnu.edu.cn下的lt参数
         HttpResponse accountPageResponse = HttpUtil.createGet("https://account.ccnu.edu.cn/cas/login" +
                 "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=").execute();
@@ -68,39 +70,47 @@ public class ReserveHelper {
 
     /**
      * 预约
+     * 成功
+     * {"act":"set_resv","msg":"操作成功！","ret":1}
+     * <p>
+     * 自己约过再约
+     * {"act":"set_resv","msg":"2021-08-21您在【2021年08月21日】已有预约，当日不能再预约","ret":0}
+     * <p>
+     * 别人约过再约
+     * {"act":"set_resv","msg":"当前时间预约冲突","ret":0}
      */
     public ReserveResponse reserve(HttpCookie cookie, String dev_id, long start, long end) {
         SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         SimpleDateFormat sdf2 = new SimpleDateFormat("Hmm");
-        String json = HttpUtil.createGet(
-                        "http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/reserve.aspx"
-                                + "?dialogid=&dev_id=" + dev_id + "&lab_id=&kind_id=&room_id="
-                                + "&type=dev&prop=&test_id=&term=&Vnumber=&classkind="
-                                + "&test_name=" + URLUtil.encode(sdf1.format(new Date(start)))
-                                + "&start=" + URLUtil.encode(sdf1.format(new Date(start)))
-                                + "&end=" + URLUtil.encode(sdf1.format(new Date(end)))
-                                + "&start_time=" + sdf2.format(start)
-                                + "&end_time=" + sdf2.format(end) + "&up_file=&memo=&act=set_resv&_="
-                                + System.currentTimeMillis())
+        String json = HttpUtil.createGet("http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/reserve.aspx"
+                        + "?dialogid=&dev_id=" + dev_id + "&lab_id=&kind_id=&room_id="
+                        + "&type=dev&prop=&test_id=&term=&Vnumber=&classkind="
+                        + "&test_name=" + URLUtil.encode(sdf1.format(new Date(start)))
+                        + "&start=" + URLUtil.encode(sdf1.format(new Date(start)))
+                        + "&end=" + URLUtil.encode(sdf1.format(new Date(end)))
+                        + "&start_time=" + sdf2.format(start)
+                        + "&end_time=" + sdf2.format(end) + "&up_file=&memo=&act=set_resv&_="
+                        + System.currentTimeMillis())
                 .cookie(cookie).execute().body();
         return JSON.parseObject(json, ReserveResponse.class);
     }
 
     public static void main(String[] args) {
-        ReserveHelper reserveHelper = new ReserveHelper();
-        HttpCookie cookie = reserveHelper.getCookie("2020180007", "");
+        ReserveService reserveService = new ReserveService();
+        HttpCookie cookie = reserveService.loginAndGetCookie("2020180007", "q63zuQushMESw3V");
         System.out.println(cookie);
 
-//        GetSeatsResponse getSeatsResponse = reserveHelper.getSeats(cookie, RoomConstants.N_F2_OPEN, 1);
-//        List<Data> data = getSeatsResponse.getData();
-//        for (Data datum : data) {
-//            String title = datum.getTitle();
-//            String devId = datum.getDevId();
-//            System.out.println(title + " " + devId);
-//        }
+        GetSeatsResponse getSeatsResponse = reserveService.getSeats(
+                cookie, RoomConstants.N_F2_OPEN, 1);
+        List<Data> data = getSeatsResponse.getData();
+        for (Data datum : data) {
+            String title = datum.getTitle();
+            String devId = datum.getDevId();
+            System.out.println(title + " " + devId);
+        }
 
-        ReserveResponse reserve = reserveHelper.reserve(cookie, "101700078",
-                1629546000000L, 1629549600000L);
+        ReserveResponse reserve = reserveService.reserve(cookie, "101700017",
+                1629631200000L, 1629634800000L);
         System.out.println(reserve);
     }
 }
