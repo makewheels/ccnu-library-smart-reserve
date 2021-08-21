@@ -45,7 +45,7 @@ public class AutoReserveTask {
             System.out.println(reserve);
             int ret = reserve.getRet();
             //如果预约成功
-            if (ret == 0) {
+            if (ret == 1) {
                 break;
             }
             try {
