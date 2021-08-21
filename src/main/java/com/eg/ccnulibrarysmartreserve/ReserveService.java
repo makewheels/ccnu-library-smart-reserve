@@ -29,8 +29,9 @@ public class ReserveService {
      */
     public HttpCookie loginAndGetCookie(String username, String password) {
         //获取account.ccnu.edu.cn下的lt参数
-        HttpResponse accountPageResponse = HttpUtil.createGet("https://account.ccnu.edu.cn/cas/login" +
-                "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=").execute();
+        HttpResponse accountPageResponse = HttpUtil.createGet(
+                "https://account.ccnu.edu.cn/cas/login" +
+                        "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=").execute();
         HttpCookie JSESSIONID = accountPageResponse.getCookie("JSESSIONID");
         String lt = StringUtils.substringBetween(accountPageResponse.body(),
                 "<input type=\"hidden\" name=\"lt\" value=\"",
@@ -69,6 +70,7 @@ public class ReserveService {
 
     /**
      * 预约
+     * <p>
      * 成功
      * {"act":"set_resv","msg":"操作成功！","ret":1}
      * <p>
