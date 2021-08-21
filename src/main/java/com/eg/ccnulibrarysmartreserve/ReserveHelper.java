@@ -1,45 +1,106 @@
 package com.eg.ccnulibrarysmartreserve;
 
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSON;
+import com.eg.ccnulibrarysmartreserve.bean.getseats.Data;
+import com.eg.ccnulibrarysmartreserve.bean.getseats.GetSeatsResponse;
+import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.HttpCookie;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 预约工具类
  */
 public class ReserveHelper {
     /**
-     * 一键获取预约系统登录cookie
+     * 一键登录获取cookie
      *
      * @return ASP.NET_SessionId=2cjfvrazvsouc245hrlytu55
      */
-    public HttpCookie oneKeyGetCookie(String username, String password) {
+    public HttpCookie getCookie(String username, String password) {
         //获取account.ccnu.edu.cn下的lt参数
-        HttpResponse accountPageresponse = HttpUtil.createGet("https://account.ccnu.edu.cn/cas/login" +
+        HttpResponse accountPageResponse = HttpUtil.createGet("https://account.ccnu.edu.cn/cas/login" +
                 "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=").execute();
-        HttpCookie JSESSIONID = accountPageresponse.getCookie("JSESSIONID");
-        String lt = StringUtils.substringBetween(accountPageresponse.body(),
+        HttpCookie JSESSIONID = accountPageResponse.getCookie("JSESSIONID");
+        String lt = StringUtils.substringBetween(accountPageResponse.body(),
                 "<input type=\"hidden\" name=\"lt\" value=\"",
                 "\" />");
 
         //向account发送登录请求
-        HttpResponse loginResponse = HttpUtil.createPost("https://account.ccnu.edu.cn/cas/login;jsessionid=" +
-                        JSESSIONID.getValue() + "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=")
+        HttpResponse loginResponse = HttpUtil.createPost(
+                        "https://account.ccnu.edu.cn/cas/login;jsessionid=" +
+                                JSESSIONID.getValue()
+                                + "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=")
                 .cookie(JSESSIONID)
                 .body("username=" + username + "&password=" + password
                         + "&lt=" + lt + "&execution=e1s1&_eventId=submit&submit=LOGIN").execute();
-        int status = loginResponse.getStatus();
         String url = loginResponse.header("Location");
-        System.out.println(status);
-        System.out.println(url);
+//        int status = loginResponse.getStatus();
+//        System.out.println(status);
+//        System.out.println(url);
         return HttpUtil.createGet(url).execute().getCookie("ASP.NET_SessionId");
     }
-    public String getSeats(){
-        HttpUtil.createGet("http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/device.aspx?byType=devcls&classkind=8&display=fp&md=d&room_id=101699189&purpose=&selectOpenAty=&cld_name=default&date=2021-08-21&fr_start=10%3A10&fr_end=10%3A40&act=get_rsv_sta&_=1629470370077")
+
+    /**
+     * 获取座位信息
+     */
+    public GetSeatsResponse getSeats(HttpCookie cookie, String room_id, int dayOffset) {
+        LocalDateTime localDateTime = LocalDateTime.now().plusDays(dayOffset);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        long timestamp = localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        Date date = new Date(timestamp);
+        String json = HttpUtil.createGet("http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/device.aspx"
+                        + "?byType=devcls&classkind=8&display=fp&md=d&room_id=" + room_id
+                        + "&purpose=&selectOpenAty=&cld_name=default&date=" + sdf.format(date)
+                        + "&fr_start=07%3A00&fr_end=22%3A00&act=get_rsv_sta&_="
+                        + System.currentTimeMillis())
+                .cookie(cookie).execute().body();
+        return JSON.parseObject(json, GetSeatsResponse.class);
+    }
+
+    /**
+     * 预约
+     */
+    public ReserveResponse reserve(HttpCookie cookie, String dev_id, long start, long end) {
+        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat sdf2 = new SimpleDateFormat("Hmm");
+        String json = HttpUtil.createGet(
+                        "http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/reserve.aspx"
+                                + "?dialogid=&dev_id=" + dev_id + "&lab_id=&kind_id=&room_id="
+                                + "&type=dev&prop=&test_id=&term=&Vnumber=&classkind="
+                                + "&test_name=" + URLUtil.encode(sdf1.format(new Date(start)))
+                                + "&start=" + URLUtil.encode(sdf1.format(new Date(start)))
+                                + "&end=" + URLUtil.encode(sdf1.format(new Date(end)))
+                                + "&start_time=" + sdf2.format(start)
+                                + "&end_time=" + sdf2.format(end) + "&up_file=&memo=&act=set_resv&_="
+                                + System.currentTimeMillis())
+                .cookie(cookie).execute().body();
+        return JSON.parseObject(json, ReserveResponse.class);
     }
 
     public static void main(String[] args) {
+        ReserveHelper reserveHelper = new ReserveHelper();
+        HttpCookie cookie = reserveHelper.getCookie("2020180007", "");
+        System.out.println(cookie);
+
+//        GetSeatsResponse getSeatsResponse = reserveHelper.getSeats(cookie, RoomConstants.N_F2_OPEN, 1);
+//        List<Data> data = getSeatsResponse.getData();
+//        for (Data datum : data) {
+//            String title = datum.getTitle();
+//            String devId = datum.getDevId();
+//            System.out.println(title + " " + devId);
+//        }
+
+        ReserveResponse reserve = reserveHelper.reserve(cookie, "101700078",
+                1629546000000L, 1629549600000L);
+        System.out.println(reserve);
     }
 }
