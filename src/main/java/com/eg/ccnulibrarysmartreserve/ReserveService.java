@@ -103,6 +103,7 @@ public class ReserveService {
 
         GetSeatsResponse getSeatsResponse = reserveService.getSeats(
                 cookie, RoomConstants.N_F2_OPEN, 1);
+        System.out.println(getSeatsResponse);
         List<Data> data = getSeatsResponse.getData();
         for (Data datum : data) {
             String title = datum.getTitle();

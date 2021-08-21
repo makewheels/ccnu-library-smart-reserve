@@ -1,5 +1,6 @@
 package com.eg.ccnulibrarysmartreserve;
 
+import cn.hutool.core.util.RandomUtil;
 import com.eg.ccnulibrarysmartreserve.bean.User;
 import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,6 +47,7 @@ public class AutoReserveTask {
             int ret = reserve.getRet();
             //如果预约成功
             if (ret == 1) {
+                System.out.println("预约成功" + RandomUtil.randomString(12));
                 break;
             }
             try {
