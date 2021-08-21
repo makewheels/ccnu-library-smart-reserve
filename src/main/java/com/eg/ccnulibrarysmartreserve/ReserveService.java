@@ -56,12 +56,11 @@ public class ReserveService {
      */
     public GetSeatsResponse getSeats(HttpCookie cookie, String room_id, int dayOffset) {
         LocalDateTime localDateTime = LocalDateTime.now().plusDays(dayOffset);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        long timestamp = localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
-        Date date = new Date(timestamp);
+        Date date = new Date(localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli());
         String json = HttpUtil.createGet("http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/device.aspx"
                         + "?byType=devcls&classkind=8&display=fp&md=d&room_id=" + room_id
-                        + "&purpose=&selectOpenAty=&cld_name=default&date=" + sdf.format(date)
+                        + "&purpose=&selectOpenAty=&cld_name=default&date="
+                        + new SimpleDateFormat("yyyy-MM-dd").format(date)
                         + "&fr_start=07%3A00&fr_end=22%3A00&act=get_rsv_sta&_="
                         + System.currentTimeMillis())
                 .cookie(cookie).execute().body();
