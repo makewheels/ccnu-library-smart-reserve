@@ -32,7 +32,7 @@ public class AutoReserveTask {
         userList.add(me);
         System.out.println(userList);
         for (User user : userList) {
-//            new Thread(() -> handleEachUser(user)).start();
+            new Thread(() -> handleEachUser(user)).start();
         }
     }
 
