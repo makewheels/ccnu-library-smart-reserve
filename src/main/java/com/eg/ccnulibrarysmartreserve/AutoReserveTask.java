@@ -1,6 +1,5 @@
 package com.eg.ccnulibrarysmartreserve;
 
-import cn.hutool.core.util.RandomUtil;
 import com.eg.ccnulibrarysmartreserve.bean.User;
 import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,23 +20,27 @@ public class AutoReserveTask {
     /**
      * 每天提前5秒开始
      */
-//    @Scheduled(cron = "55 59 17 ? * *")
-    @Scheduled(cron = "0 37 18 ? * *")
+    @Scheduled(cron = "55 59 17 ? * *")
     private void reserve() {
-        System.out.println(System.currentTimeMillis());
         List<User> userList = new ArrayList<>();
         User me = new User();
         me.setUsername("2020180007");
         me.setPassword("q63zuQushMESw3V");
         userList.add(me);
-        System.out.println(userList);
+        System.out.println("定时任务启动，用户列表：");
+        for (User user : userList) {
+            System.out.print(user.getUsername() + " ");
+        }
+        System.out.println();
         for (User user : userList) {
             new Thread(() -> handleEachUser(user)).start();
         }
     }
 
     private void handleEachUser(User user) {
+        System.out.println("开始为用户预约: " + user.getUsername());
         for (int i = 0; i < 20; i++) {
+            System.out.println("开始预约第 " + (i + 1) + " 次");
             HttpCookie cookie = reserveService.loginAndGetCookie(user.getUsername(), user.getPassword());
             user.setCookie(cookie);
             LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
@@ -49,7 +52,7 @@ public class AutoReserveTask {
             int ret = reserve.getRet();
             //如果预约成功
             if (ret == 1) {
-                System.out.println("预约成功" + RandomUtil.randomString(12));
+                System.out.println("预约成功: " + user.getUsername());
                 break;
             }
             try {
@@ -58,6 +61,7 @@ public class AutoReserveTask {
                 e.printStackTrace();
             }
         }
+        System.out.println("为指定用户预约超次数: " + user.getUsername());
     }
 
 }
