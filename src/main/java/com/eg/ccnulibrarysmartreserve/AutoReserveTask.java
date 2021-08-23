@@ -21,8 +21,10 @@ public class AutoReserveTask {
     /**
      * 每天提前5秒开始
      */
-    @Scheduled(cron = "55 59 17 ? * ")
+//    @Scheduled(cron = "55 59 17 ? * *")
+    @Scheduled(cron = "0 40 18 ? * *")
     private void reserve() {
+        System.out.println(System.currentTimeMillis());
         List<User> userList = new ArrayList<>();
         User me = new User();
         me.setUsername("2020180007");
@@ -30,7 +32,7 @@ public class AutoReserveTask {
         userList.add(me);
         System.out.println(userList);
         for (User user : userList) {
-            new Thread(() -> handleEachUser(user)).start();
+//            new Thread(() -> handleEachUser(user)).start();
         }
     }
 
