@@ -22,7 +22,7 @@ public class AutoReserveTask {
      * 每天提前5秒开始
      */
 //    @Scheduled(cron = "55 59 17 ? * *")
-    @Scheduled(cron = "0 40 18 ? * *")
+    @Scheduled(cron = "0 37 18 ? * *")
     private void reserve() {
         System.out.println(System.currentTimeMillis());
         List<User> userList = new ArrayList<>();
