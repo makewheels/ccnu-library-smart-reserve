@@ -38,11 +38,12 @@ public class AutoReserveTask {
     }
 
     private void handleEachUser(User user) {
-        System.out.println("开始为用户预约: " + user.getUsername());
+        String username = user.getUsername();
+        System.out.println("开始为用户预约: " + username);
+        HttpCookie cookie = reserveService.loginAndGetCookie(username, user.getPassword());
+        user.setCookie(cookie);
         for (int i = 0; i < 20; i++) {
             System.out.println("开始预约第 " + (i + 1) + " 次");
-            HttpCookie cookie = reserveService.loginAndGetCookie(user.getUsername(), user.getPassword());
-            user.setCookie(cookie);
             LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
             LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(21).withMinute(0);
             ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101700014",
