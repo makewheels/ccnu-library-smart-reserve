@@ -45,18 +45,17 @@ public class AutoReserveTask {
         log.info("开始为用户预约: " + username);
         HttpCookie cookie = reserveService.loginAndGetCookie(username, user.getPassword());
         user.setCookie(cookie);
-        for (int i = 0; i < 20; i++) {
-            log.info("开始预约第 " + (i + 1) + " 次");
+        for (int i = 1; i <= 20; i++) {
+            log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次 " + username);
             LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
             LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(21).withMinute(0);
             ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101700014",
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
                     end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
-            log.info(JSON.toJSONString(reserve));
-            int ret = reserve.getRet();
+            log.info(username + " " + JSON.toJSONString(reserve));
             //如果预约成功
-            if (ret == 1) {
-                log.info("预约成功: " + user.getUsername());
+            if (reserve.getRet() == 1) {
+                log.info("预约成功: " + username);
                 break;
             }
             try {
@@ -65,7 +64,7 @@ public class AutoReserveTask {
                 e.printStackTrace();
             }
         }
-        log.info("为指定用户预约超次数: " + user.getUsername());
+        log.info("为指定用户预约超次数: " + username);
     }
 
 }
