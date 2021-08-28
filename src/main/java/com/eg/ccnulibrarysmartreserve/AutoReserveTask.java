@@ -40,7 +40,7 @@ public class AutoReserveTask {
             user.setCookie(cookie);
             LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
             LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(21).withMinute(0);
-            ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101700014",
+            ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101700041",
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
                     end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
             System.out.println(reserve);
