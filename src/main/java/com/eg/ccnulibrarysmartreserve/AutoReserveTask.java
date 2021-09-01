@@ -57,7 +57,7 @@ public class AutoReserveTask {
             //如果预约成功
             if (reserve.getRet() == 1) {
                 log.info("预约成功: " + username);
-                break;
+                return;
             }
             try {
                 Thread.sleep(700);
