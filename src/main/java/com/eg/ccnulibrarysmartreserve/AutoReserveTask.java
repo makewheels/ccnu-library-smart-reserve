@@ -47,8 +47,8 @@ public class AutoReserveTask {
         user.setCookie(cookie);
         for (int i = 1; i <= 70; i++) {
             log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次 " + username);
-            LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
-            LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(21).withMinute(0);
+            LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(30);
+            LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(22).withMinute(0);
             log.info("start = " + start + " end" + end);
             ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101700041",
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
