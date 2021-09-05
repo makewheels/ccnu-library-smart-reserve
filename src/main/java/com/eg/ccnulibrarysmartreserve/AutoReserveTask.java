@@ -50,7 +50,7 @@ public class AutoReserveTask {
             LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(30);
             LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(22).withMinute(0);
             log.info("start = " + start + " end" + end);
-            ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101700041",
+            ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101699945",
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
                     end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
             log.info(username + " " + JSON.toJSONString(reserve));
