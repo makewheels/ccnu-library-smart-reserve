@@ -86,7 +86,7 @@ public class ReserveService {
         String json = HttpUtil.createGet("http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/reserve.aspx"
                         + "?dialogid=&dev_id=" + dev_id + "&lab_id=&kind_id=&room_id="
                         + "&type=dev&prop=&test_id=&term=&Vnumber=&classkind="
-                        + "&test_name=" + URLUtil.encode(sdf1.format(new Date(start)))
+                        + "&test_name=" + "Smart Reserve " + URLUtil.encode(sdf1.format(new Date(start)))
                         + "&start=" + URLUtil.encode(sdf1.format(new Date(start)))
                         + "&end=" + URLUtil.encode(sdf1.format(new Date(end)))
                         + "&start_time=" + sdf2.format(start)
