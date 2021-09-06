@@ -7,6 +7,7 @@ import java.net.HttpCookie;
 public class User {
     private String username;
     private String password;
+    private String dev_id;
     private HttpCookie cookie;
 
     public String getUsername() {
@@ -31,6 +32,14 @@ public class User {
 
     public void setCookie(HttpCookie cookie) {
         this.cookie = cookie;
+    }
+
+    public String getDev_id() {
+        return dev_id;
+    }
+
+    public void setDev_id(String dev_id) {
+        this.dev_id = dev_id;
     }
 
     @Override
