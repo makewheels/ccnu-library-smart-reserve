@@ -29,6 +29,7 @@ public class AutoReserveTask {
         User me = new User();
         me.setUsername("2020180007");
         me.setPassword("q63zuQushMESw3V");
+        me.setDev_id("101700061");
         userList.add(me);
         log.info("定时任务启动，用户列表：");
         for (User user : userList) {
@@ -50,7 +51,7 @@ public class AutoReserveTask {
             LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(30);
             LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(22).withMinute(0);
             log.info("start = " + start + " end" + end);
-            ReserveResponse reserve = reserveService.reserve(user.getCookie(), "101699945",
+            ReserveResponse reserve = reserveService.reserve(user.getCookie(), user.getDev_id(),
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
                     end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
             log.info(username + " " + JSON.toJSONString(reserve));
