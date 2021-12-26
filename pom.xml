@@ -10,12 +10,13 @@
     </parent>
     <groupId>com.eg</groupId>
     <artifactId>ccnu-library-smart-reserve</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>ccnu-library-smart-reserve</name>
-    <description>ccnu-library-smart-reserve</description>
+
     <properties>
         <java.version>1.8</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
