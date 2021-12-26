@@ -37,11 +37,17 @@ public class AutoReserveTask {
         }
         log.info("\n");
         for (User user : userList) {
-            new Thread(() -> handleEachUser(user)).start();
+            new Thread(() -> {
+                try {
+                    handleEachUser(user);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         }
     }
 
-    private void handleEachUser(User user) {
+    private void handleEachUser(User user) throws InterruptedException {
         String username = user.getUsername();
         log.info("开始为用户预约: " + username);
         HttpCookie cookie = reserveService.loginAndGetCookie(username, user.getPassword());
@@ -60,11 +66,7 @@ public class AutoReserveTask {
                 log.info("预约成功: " + username);
                 return;
             }
-            try {
-                Thread.sleep(700);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.sleep(700);
         }
         log.info("为指定用户预约超次数: " + username);
     }
