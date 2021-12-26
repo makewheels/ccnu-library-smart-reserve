@@ -25,7 +25,7 @@ public class AutoReserveTask {
     private ReserveService reserveService;
 
     /**
-     * 每天提前5秒开始
+     * 每天提前3秒开始
      */
     @Scheduled(cron = "57 59 17 ? * *")
     public void reserve() throws InterruptedException {
