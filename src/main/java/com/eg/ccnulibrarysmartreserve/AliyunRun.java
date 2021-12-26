@@ -11,6 +11,10 @@ public class AliyunRun implements StreamRequestHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) {
-        autoReserveTask.reserve();
+        try {
+            autoReserveTask.reserve();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

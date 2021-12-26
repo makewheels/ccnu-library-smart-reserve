@@ -1,7 +1,10 @@
 package com.eg.ccnulibrarysmartreserve;
 
 import com.alibaba.fastjson.JSON;
-import com.eg.ccnulibrarysmartreserve.bean.User;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.eg.ccnulibrarysmartreserve.bean.config.Seat;
+import com.eg.ccnulibrarysmartreserve.bean.config.User;
 import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,7 +14,6 @@ import javax.annotation.Resource;
 import java.net.HttpCookie;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -24,51 +26,121 @@ public class AutoReserveTask {
      * 每天提前5秒开始
      */
     @Scheduled(cron = "57 59 17 ? * *")
-    public void reserve() {
-        List<User> userList = new ArrayList<>();
-        User me = new User();
-        me.setUsername("2020180007");
-        me.setPassword("q63zuQushMESw3V");
-        me.setDev_id("101700061");
-        userList.add(me);
-        log.info("定时任务启动，用户列表：");
-        for (User user : userList) {
-            log.info(user.getUsername() + " ");
-        }
-        log.info("\n");
-        for (User user : userList) {
-            new Thread(() -> {
+    public void reserve() throws InterruptedException {
+//        JSONObject config = JSON.parseObject(System.getenv("config"));
+
+        String json = "{\"users\":[{\"username\":\"2021122112\",\"password\":\"n75QXQprnBaZYaxM\",\"" +
+                "notificationChannels\":[{\"channel\":\"email\",\"content\":\"vwbrsi47315@chacuo.net\"" +
+                "},{\"channel\":\"sms\",\"content\":\"13460672425\"}],\"seats\":[{\"name\":\"Z1D383\"," +
+                "\"dev_id\":\"100456291\",\"startHour\":10,\"startMinute\":0,\"en" +
+                "dHour\":22,\"endMinute\":0}]}]}";
+        JSONObject config = JSON.parseObject(json);
+        JSONArray usersJSONArray = config.getJSONArray("users");
+        List<User> users = JSON.parseArray(JSON.toJSONString(usersJSONArray), User.class);
+        log.info("解析出用户列表：");
+        log.info(JSON.toJSONString(users));
+
+        for (User user : users) {
+            Thread thread = new Thread(() -> {
                 try {
                     handleEachUser(user);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }).start();
+            });
+            thread.start();
+            thread.join();
         }
     }
 
-    private void handleEachUser(User user) throws InterruptedException {
+    /**
+     * 当预约成功时
+     *
+     * @param user
+     * @param seat
+     */
+    private void onReserveSuccess(User user, Seat seat) {
+        log.info("预约成功: username = " + user.getUsername() + ", seat.name = " + seat.getName()
+                + ", seat.dev_id = " + seat.getDev_id());
+
+
+    }
+
+    /**
+     * 预约多次未成功超次数
+     *
+     * @param user
+     * @param seat
+     */
+    private void onReserveTimeout(User user, Seat seat) {
+        log.info("预约多次未成功超次数: username = " + user.getUsername() + ", seat.name = " + seat.getName()
+                + ", seat.dev_id = " + seat.getDev_id());
+
+    }
+
+    /**
+     * 处理一个座位
+     *
+     * @param user
+     * @param seat
+     * @throws InterruptedException
+     */
+    private void handleEachSeat(User user, Seat seat) throws InterruptedException {
         String username = user.getUsername();
-        log.info("开始为用户预约: " + username);
-        HttpCookie cookie = reserveService.loginAndGetCookie(username, user.getPassword());
-        user.setCookie(cookie);
+        //最大尝试次数
         for (int i = 1; i <= 70; i++) {
-            log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次 " + username);
-            LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(20);
-            LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(22).withMinute(0);
-            log.info("start = " + start + " end" + end);
-            ReserveResponse reserve = reserveService.reserve(user.getCookie(), user.getDev_id(),
+            log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次, username = " + username
+                    + "seat.name = " + seat.getName() + ", seat.dev_id = " + seat.getDev_id());
+            //先搞定起始和结束时间
+            LocalDateTime start = LocalDateTime.now().plusDays(1)
+                    .withHour(seat.getStartHour()).withMinute(seat.getStartMinute());
+            LocalDateTime end = LocalDateTime.now().plusDays(1)
+                    .withHour(seat.getEndHour()).withMinute(seat.getEndMinute());
+            log.info("startTime = " + start + ", endTime = " + end);
+            //执行预约
+            ReserveResponse reserveResponse = reserveService.reserve(user.getCookie(), user.getDev_id(),
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
                     end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
-            log.info(username + " " + JSON.toJSONString(reserve));
+            log.info("预约结果：username = " + username + ", seat.name = " + seat.getName()
+                    + ", seat.dev_id = " + seat.getDev_id() + ", reserveResponse = "
+                    + JSON.toJSONString(reserveResponse));
             //如果预约成功
-            if (reserve.getRet() == 1) {
-                log.info("预约成功: " + username);
+            /**
+             * @see ReserveService#reserve()
+             */
+            if (reserveResponse.getRet() == 1) {
+                onReserveSuccess(user, seat);
                 return;
+            } else {
+                //到这里说明是预约失败，原因有三种，详见ReserveService#reserve()注释
+                //预约失败并不能直接return，因为可能是没到时间，也有低概率是被别人约了
+                //这里ret值一样，就不做区分了
+                //大概率是还没到预约时间，系统也并不是准时开放，所以才加了那么大的预约次数
+                //那没到时间就需要，sleep等待，再开始下一轮尝试
+                //所以这里不做处理也对，就是可能出现已被约过，但是还在反复发请求约
             }
+            //还没到开放预约时间，稍作等待，再做尝试
             Thread.sleep(700);
         }
-        log.info("为指定用户预约超次数: " + username);
+        //超时处理
+        onReserveTimeout(user, seat);
+    }
+
+    /**
+     * 处理一个用户
+     *
+     * @param user
+     * @throws InterruptedException
+     */
+    private void handleEachUser(User user) throws InterruptedException {
+        String username = user.getUsername();
+        log.info("开始为用户预约: username = " + username);
+        HttpCookie cookie = reserveService.loginAndGetCookie(username, user.getPassword());
+        user.setCookie(cookie);
+        List<Seat> seats = user.getSeats();
+        for (Seat seat : seats) {
+            handleEachSeat(user, seat);
+        }
     }
 
 }

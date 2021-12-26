@@ -4,7 +4,6 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
-import com.eg.ccnulibrarysmartreserve.bean.getseats.Data;
 import com.eg.ccnulibrarysmartreserve.bean.getseats.GetSeatsResponse;
 import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 预约工具类
@@ -39,8 +37,7 @@ public class ReserveService {
 
         //向account发送登录请求
         HttpResponse loginResponse = HttpUtil.createPost(
-                        "https://account.ccnu.edu.cn/cas/login;jsessionid=" +
-                                JSESSIONID.getValue()
+                        "https://account.ccnu.edu.cn/cas/login;jsessionid=" + JSESSIONID.getValue()
                                 + "?service=http://kjyy.ccnu.edu.cn/loginall.aspx?page=")
                 .cookie(JSESSIONID)
                 .body("username=" + username + "&password=" + password
@@ -69,15 +66,20 @@ public class ReserveService {
     }
 
     /**
-     * 预约
+     * 执行预约
      * <p>
-     * 成功
+     * 返回示例：
+     * <p>
+     * 没到预约开放时间：
+     * {"act":"set_resv","msg":"2021-12-27要到[18:00]方可预约","ret":0}
+     * <p>
+     * 成功：
      * {"act":"set_resv","msg":"操作成功！","ret":1}
      * <p>
-     * 自己约过再约
+     * 自己约过再约：
      * {"act":"set_resv","msg":"2021-08-21您在【2021年08月21日】已有预约，当日不能再预约","ret":0}
      * <p>
-     * 别人约过再约
+     * 别人约过再约：
      * {"act":"set_resv","msg":"当前时间预约冲突","ret":0}
      */
     public ReserveResponse reserve(HttpCookie cookie, String dev_id, long start, long end) {
@@ -86,7 +88,8 @@ public class ReserveService {
         String json = HttpUtil.createGet("http://kjyy.ccnu.edu.cn/ClientWeb/pro/ajax/reserve.aspx"
                         + "?dialogid=&dev_id=" + dev_id + "&lab_id=&kind_id=&room_id="
                         + "&type=dev&prop=&test_id=&term=&Vnumber=&classkind="
-                        + "&test_name=" + "Smart Reserve " + URLUtil.encode(sdf1.format(new Date(start)))
+                        + "&test_name="
+//                        + "Smart Reserve " + URLUtil.encode(sdf1.format(new Date(start)))
                         + "&start=" + URLUtil.encode(sdf1.format(new Date(start)))
                         + "&end=" + URLUtil.encode(sdf1.format(new Date(end)))
                         + "&start_time=" + sdf2.format(start)
@@ -98,21 +101,21 @@ public class ReserveService {
 
     public static void main(String[] args) {
         ReserveService reserveService = new ReserveService();
-        HttpCookie cookie = reserveService.loginAndGetCookie("2020180007", "888888");
+        HttpCookie cookie = reserveService.loginAndGetCookie("2020180007", "q63zuQushMESw3V");
         System.out.println(cookie);
 
-        GetSeatsResponse getSeatsResponse = reserveService.getSeats(
-                cookie, "100456291", 1);
-        System.out.println(getSeatsResponse);
-        List<Data> data = getSeatsResponse.getData();
-        for (Data datum : data) {
-            String title = datum.getTitle();
-            String devId = datum.getDevId();
-            System.out.println(title + " " + devId);
-        }
+//        GetSeatsResponse getSeatsResponse = reserveService.getSeats(
+//                cookie, "100671221", 1);
+//        System.out.println(getSeatsResponse);
+//        List<Data> data = getSeatsResponse.getData();
+//        for (Data datum : data) {
+//            String title = datum.getTitle();
+//            String devId = datum.getDevId();
+//            System.out.println(title + " " + devId);
+//        }
 
-        ReserveResponse reserve = reserveService.reserve(cookie, "101700017",
-                1629631200000L, 1629634800000L);
+        ReserveResponse reserve = reserveService.reserve(cookie, "100671226",
+                1640592000000L, 1640595600000L);
         System.out.println(reserve);
     }
 }
