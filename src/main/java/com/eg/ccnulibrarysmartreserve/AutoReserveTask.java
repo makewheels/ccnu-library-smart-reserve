@@ -24,7 +24,7 @@ public class AutoReserveTask {
      * 每天提前5秒开始
      */
     @Scheduled(cron = "57 59 17 ? * *")
-    private void reserve() {
+    public void reserve() {
         List<User> userList = new ArrayList<>();
         User me = new User();
         me.setUsername("2020180007");

@@ -31,12 +31,12 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.7.9</version>
+            <version>5.7.17</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.78</version>
+            <version>1.2.79</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -46,13 +46,19 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tingyugetc520</groupId>
             <artifactId>dt-java</artifactId>
             <version>0.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aliyun.fc.runtime</groupId>
+            <artifactId>fc-java-core</artifactId>
+            <version>1.4.0</version>
         </dependency>
 
     </dependencies>
