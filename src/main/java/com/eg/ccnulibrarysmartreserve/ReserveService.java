@@ -98,11 +98,11 @@ public class ReserveService {
 
     public static void main(String[] args) {
         ReserveService reserveService = new ReserveService();
-        HttpCookie cookie = reserveService.loginAndGetCookie("2020180007", "q63zuQushMESw3V");
+        HttpCookie cookie = reserveService.loginAndGetCookie("2020180007", "888888");
         System.out.println(cookie);
 
         GetSeatsResponse getSeatsResponse = reserveService.getSeats(
-                cookie, RoomConstants.N_F2_OPEN, 1);
+                cookie, "100456291", 1);
         System.out.println(getSeatsResponse);
         List<Data> data = getSeatsResponse.getData();
         for (Data datum : data) {
