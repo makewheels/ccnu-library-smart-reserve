@@ -1,5 +1,6 @@
 package com.eg.ccnulibrarysmartreserve;
 
+import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.net.HttpCookie;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -29,11 +31,9 @@ public class AutoReserveTask {
     public void reserve() throws InterruptedException {
 //        JSONObject config = JSON.parseObject(System.getenv("config"));
 
-        String json = "{\"users\":[{\"username\":\"2021122112\",\"password\":\"n75QXQprnBaZYaxM\",\"" +
-                "notificationChannels\":[{\"channel\":\"email\",\"content\":\"vwbrsi47315@chacuo.net\"" +
-                "},{\"channel\":\"sms\",\"content\":\"13460672425\"}],\"seats\":[{\"name\":\"Z1D383\"," +
-                "\"dev_id\":\"100456291\",\"startHour\":10,\"startMinute\":0,\"en" +
-                "dHour\":22,\"endMinute\":0}]}]}";
+        File configFile = new File(AutoReserveTask.class.getResource("/example-config.json").getPath());
+        String json = FileUtil.readUtf8String(configFile);
+
         JSONObject config = JSON.parseObject(json);
         JSONArray usersJSONArray = config.getJSONArray("users");
         List<User> users = JSON.parseArray(JSON.toJSONString(usersJSONArray), User.class);
@@ -90,7 +90,7 @@ public class AutoReserveTask {
         //最大尝试次数
         for (int i = 1; i <= 70; i++) {
             log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次, username = " + username
-                    + "seat.name = " + seat.getName() + ", seat.dev_id = " + seat.getDev_id());
+                    + ", seat.name = " + seat.getName() + ", seat.dev_id = " + seat.getDev_id());
             //先搞定起始和结束时间
             LocalDateTime start = LocalDateTime.now().plusDays(1)
                     .withHour(seat.getStartHour()).withMinute(seat.getStartMinute());
@@ -98,7 +98,7 @@ public class AutoReserveTask {
                     .withHour(seat.getEndHour()).withMinute(seat.getEndMinute());
             log.info("startTime = " + start + ", endTime = " + end);
             //执行预约
-            ReserveResponse reserveResponse = reserveService.reserve(user.getCookie(), user.getDev_id(),
+            ReserveResponse reserveResponse = reserveService.reserve(user.getCookie(), seat.getDev_id(),
                     start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
                     end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
             log.info("预约结果：username = " + username + ", seat.name = " + seat.getName()

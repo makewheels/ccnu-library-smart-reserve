@@ -15,11 +15,11 @@
       ],
       "seats": [
         {
-          "name": "Z1D383",
-          "dev_id": "100456291",
-          "startHour": 10,
+          "name": "Z9D118",
+          "dev_id": "100671221",
+          "startHour": 11,
           "startMinute": 0,
-          "endHour": 22,
+          "endHour": 12,
           "endMinute": 0
         }
       ]

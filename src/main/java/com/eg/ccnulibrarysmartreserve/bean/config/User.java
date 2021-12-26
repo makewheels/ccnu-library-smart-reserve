@@ -10,7 +10,6 @@ import java.util.List;
 public class User {
     private String username;
     private String password;
-    private String dev_id;
 
     private List<NotificationChannel> notificationChannels;
     private List<Seat> seats;
