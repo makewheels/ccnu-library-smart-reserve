@@ -14,8 +14,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.File;
 import java.net.HttpCookie;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -97,7 +99,11 @@ public class AutoReserveTask {
         String username = user.getUsername();
         //最大尝试次数
         for (int i = 1; i <= 70; i++) {
-            log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次, username = " + username
+            String currentTimeString = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now());
+
+            log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次, "
+                    + "currentTime = " + currentTimeString
+                    + "username = " + username
                     + ", seat.name = " + seat.getName() + ", seat.dev_id = " + seat.getDev_id());
             //先搞定起始和结束时间
             LocalDateTime start = LocalDateTime.now().plusDays(1)
