@@ -1,8 +1,8 @@
 {
   "users": [
     {
-      "username": "2021122112",
-      "password": "n75QXQprnBaZYaxM",
+      "username": "0px1rVA1X8OSceqT",
+      "password": "uRNmNc92kEXCVLQU",
       "notificationChannels": [
         {
           "channel": "email",
@@ -16,11 +16,11 @@
       "seats": [
         {
           "name": "Z1D383",
-          "dev_id": "100456291",
-          "startHour": 11,
-          "startMinute": 0,
-          "endHour": 12,
-          "endMinute": 0
+          "dev_id": "100670569",
+          "startHour": 8,
+          "startMinute": 30,
+          "endHour": 9,
+          "endMinute": 30
         }
       ]
     }

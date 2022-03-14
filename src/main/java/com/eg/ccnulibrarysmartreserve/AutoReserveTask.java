@@ -24,10 +24,19 @@ public class AutoReserveTask {
     @Resource
     private ReserveService reserveService;
 
+    public static void main(String[] args) throws InterruptedException {
+        new AutoReserveTask().manualRun();
+    }
+
+    private void manualRun() throws InterruptedException {
+        reserveService = new ReserveService();
+        this.reserve();
+    }
+
     /**
-     * 每天提前3秒开始
+     * 每天提前x秒开始
      */
-    @Scheduled(cron = "57 59 17 ? * *")
+    @Scheduled(cron = "55 59 17 ? * *")
     public void reserve() throws InterruptedException {
 //        JSONObject config = JSON.parseObject(System.getenv("config"));
 
