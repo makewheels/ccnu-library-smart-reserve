@@ -58,7 +58,6 @@ public class AutoReserveTask {
                 }
             });
             thread.start();
-            thread.join();
         }
     }
 
@@ -129,7 +128,7 @@ public class AutoReserveTask {
                 //所以这里不做处理也对，就是可能出现已被约过，但是还在反复发请求约
             }
             //还没到开放预约时间，稍作等待，再做尝试
-            Thread.sleep(700);
+            Thread.sleep(500);
         }
         //超时处理
         onReserveTimeout(user, seat);

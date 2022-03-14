@@ -1,8 +1,8 @@
 {
   "users": [
     {
-      "username": "0px1rVA1X8OSceqT",
-      "password": "uRNmNc92kEXCVLQU",
+      "username": "1111111",
+      "password": "u4YmEhqtsNWUnJ3H",
       "notificationChannels": [
         {
           "channel": "email",
@@ -16,7 +16,31 @@
       "seats": [
         {
           "name": "Z1D383",
-          "dev_id": "100670569",
+          "dev_id": "100745821",
+          "startHour": 8,
+          "startMinute": 30,
+          "endHour": 9,
+          "endMinute": 30
+        }
+      ]
+    },
+    {
+      "username": "22222",
+      "password": "u4YmEhqtsNWUnJ3H",
+      "notificationChannels": [
+        {
+          "channel": "email",
+          "content": "vwbrsi47315@chacuo.net"
+        },
+        {
+          "channel": "sms",
+          "content": "13460672425"
+        }
+      ],
+      "seats": [
+        {
+          "name": "Z1D383",
+          "dev_id": "100745821",
           "startHour": 8,
           "startMinute": 30,
           "endHour": 9,
