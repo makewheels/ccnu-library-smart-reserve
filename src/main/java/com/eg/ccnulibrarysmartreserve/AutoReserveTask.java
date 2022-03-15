@@ -131,7 +131,7 @@ public class AutoReserveTask {
             }
             log.info("startTime = " + start + ", endTime = " + end);
             //执行预约
-            ReserveResponse reserveResponse = null;
+            ReserveResponse reserveResponse;
             try {
                 reserveResponse = reserveService.reserve(user.getCookie(), seat.getDev_id(),
                         start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
