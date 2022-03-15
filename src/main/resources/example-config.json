@@ -1,8 +1,8 @@
 {
   "users": [
     {
-      "username": "1111111",
-      "password": "u4YmEhqtsNWUnJ3H",
+      "username": "2020180007",
+      "password": "Mp6FqLtn4A1r1ulq",
       "notificationChannels": [
         {
           "channel": "email",
@@ -21,26 +21,10 @@
           "startMinute": 30,
           "endHour": 9,
           "endMinute": 30
-        }
-      ]
-    },
-    {
-      "username": "22222",
-      "password": "u4YmEhqtsNWUnJ3H",
-      "notificationChannels": [
-        {
-          "channel": "email",
-          "content": "vwbrsi47315@chacuo.net"
         },
         {
-          "channel": "sms",
-          "content": "13460672425"
-        }
-      ],
-      "seats": [
-        {
-          "name": "Z1D383",
-          "dev_id": "100745821",
+          "name": "Z1Dxxx",
+          "dev_id": "100456168",
           "startHour": 8,
           "startMinute": 30,
           "endHour": 9,

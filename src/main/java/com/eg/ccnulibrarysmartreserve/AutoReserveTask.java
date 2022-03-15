@@ -1,7 +1,7 @@
 package com.eg.ccnulibrarysmartreserve;
 
-import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpGlobalConfig;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +42,7 @@ public class AutoReserveTask {
      */
     @Scheduled(cron = "55 59 17 ? * *")
     public void reserve() throws InterruptedException {
+        HttpGlobalConfig.setTimeout(7000);
 //        JSONObject config = JSON.parseObject(System.getenv("config"));
 
         File configFile = new File(AutoReserveTask.class.getResource("/example-config.json").getPath());
@@ -105,7 +106,7 @@ public class AutoReserveTask {
 
             log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次, "
                     + "currentTime = " + currentTimeString
-                    + "username = " + username
+                    + ", username = " + username
                     + ", seat.name = " + seat.getName() + ", seat.dev_id = " + seat.getDev_id());
             //先搞定起始和结束时间
             int endHour = seat.getEndHour();
@@ -128,12 +129,17 @@ public class AutoReserveTask {
                     end = end.withHour(14).withMinute(0);
                 }
             }
-
             log.info("startTime = " + start + ", endTime = " + end);
             //执行预约
-            ReserveResponse reserveResponse = reserveService.reserve(user.getCookie(), seat.getDev_id(),
-                    start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
-                    end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
+            ReserveResponse reserveResponse = null;
+            try {
+                reserveResponse = reserveService.reserve(user.getCookie(), seat.getDev_id(),
+                        start.toInstant(ZoneOffset.of("+8")).toEpochMilli(),
+                        end.toInstant(ZoneOffset.of("+8")).toEpochMilli());
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
             log.info("预约结果：username = " + username + ", seat.name = " + seat.getName()
                     + ", seat.dev_id = " + seat.getDev_id() + ", reserveResponse = "
                     + JSON.toJSONString(reserveResponse));
@@ -189,6 +195,8 @@ public class AutoReserveTask {
             if (isSeatSuccess) {
                 break;
             }
+            //如果能到这里，说明上一个seat失败
+            log.info("username = " + username + ", 上一个seat:dev_id = " + seat.getDev_id() + "失败，开始下一个");
         }
     }
 
