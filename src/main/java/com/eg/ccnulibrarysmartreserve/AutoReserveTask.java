@@ -1,5 +1,6 @@
 package com.eg.ccnulibrarysmartreserve;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.File;
 import java.net.HttpCookie;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.List;
 
 @Component
@@ -52,6 +53,7 @@ public class AutoReserveTask {
         log.info("解析出用户列表：");
         log.info(JSON.toJSONString(users));
 
+        //每个用户一个线程
         for (User user : users) {
             Thread thread = new Thread(() -> {
                 try {
@@ -106,10 +108,27 @@ public class AutoReserveTask {
                     + "username = " + username
                     + ", seat.name = " + seat.getName() + ", seat.dev_id = " + seat.getDev_id());
             //先搞定起始和结束时间
+            int endHour = seat.getEndHour();
+            int endMinute = seat.getEndMinute();
             LocalDateTime start = LocalDateTime.now().plusDays(1)
                     .withHour(seat.getStartHour()).withMinute(seat.getStartMinute());
             LocalDateTime end = LocalDateTime.now().plusDays(1)
-                    .withHour(seat.getEndHour()).withMinute(seat.getEndMinute());
+                    .withHour(endHour).withMinute(endMinute);
+
+            //如果明天是周五，并且预订end时间的hour和minute超过14:00，那么hour和minute强制改成14:00
+            //判断明天是不是星期五
+            Calendar tomorrow = Calendar.getInstance();
+            tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+            int dayOfWeek = tomorrow.get(Calendar.DAY_OF_WEEK);
+            dayOfWeek--;
+            //如果是星期五
+            if (dayOfWeek == 5) {
+                //并且时间超过14:00
+                if (endHour > 14 || (endHour == 14 && endMinute != 0)) {
+                    end = end.withHour(14).withMinute(0);
+                }
+            }
+
             log.info("startTime = " + start + ", endTime = " + end);
             //执行预约
             ReserveResponse reserveResponse = reserveService.reserve(user.getCookie(), seat.getDev_id(),

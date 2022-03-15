@@ -1,4 +1,4 @@
-package com.eg.ccnulibrarysmartreserve;
+package com.eg.ccnulibrarysmartreserve.etc;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

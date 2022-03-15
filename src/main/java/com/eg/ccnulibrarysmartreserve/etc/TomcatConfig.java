@@ -1,4 +1,4 @@
-package com.eg.ccnulibrarysmartreserve;
+package com.eg.ccnulibrarysmartreserve.etc;
 
 import org.apache.catalina.connector.Connector;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
