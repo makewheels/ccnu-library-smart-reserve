@@ -8,6 +8,7 @@ import com.eg.ccnulibrarysmartreserve.bean.config.Seat;
 import com.eg.ccnulibrarysmartreserve.bean.config.User;
 import com.eg.ccnulibrarysmartreserve.bean.reserve.ReserveResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -73,7 +74,6 @@ public class AutoReserveTask {
         log.info("预约成功: username = " + user.getUsername() + ", seat.name = " + seat.getName()
                 + ", seat.dev_id = " + seat.getDev_id());
 
-
     }
 
     /**
@@ -85,17 +85,17 @@ public class AutoReserveTask {
     private void onReserveTimeout(User user, Seat seat) {
         log.info("预约多次未成功超次数: username = " + user.getUsername() + ", seat.name = " + seat.getName()
                 + ", seat.dev_id = " + seat.getDev_id());
-
     }
 
     /**
      * 处理一个座位
-     *
-     * @param user
-     * @param seat
-     * @throws InterruptedException
+     * <p>
+     * 如果没到预约时间，不返回，在循环内转悠
+     * 如果预约成功，返回true
+     * 已被自己约过不做处理，当做没到时间，继续在循环内转悠
+     * 已被别人约过返回false，用于父级调用者启用备选方案
      */
-    private void handleEachSeat(User user, Seat seat) throws InterruptedException {
+    private boolean handleEachSeat(User user, Seat seat) throws InterruptedException {
         String username = user.getUsername();
         //最大尝试次数
         for (int i = 1; i <= 70; i++) {
@@ -118,26 +118,37 @@ public class AutoReserveTask {
             log.info("预约结果：username = " + username + ", seat.name = " + seat.getName()
                     + ", seat.dev_id = " + seat.getDev_id() + ", reserveResponse = "
                     + JSON.toJSONString(reserveResponse));
-            //如果预约成功
-            /**
-             * @see ReserveService#reserve()
-             */
+            //如果预约成功，返回true
+            //@see ReserveService#reserve()
             if (reserveResponse.getRet() == 1) {
                 onReserveSuccess(user, seat);
-                return;
+                return true;
             } else {
-                //到这里说明是预约失败，原因有三种，详见ReserveService#reserve()注释
-                //预约失败并不能直接return，因为可能是没到时间，也有低概率是被别人约了
-                //这里ret值一样，就不做区分了
-                //大概率是还没到预约时间，系统也并不是准时开放，所以才加了那么大的预约次数
-                //那没到时间就需要，sleep等待，再开始下一轮尝试
-                //所以这里不做处理也对，就是可能出现已被约过，但是还在反复发请求约
+                //2022年3月15日20:17:30，杜继虎需求：seats备选list
+                //首先，需要区分三种失败情况：1没到预约开放时间，2自己约过再约，3别人约过再约
+
+                String msg = reserveResponse.getMsg();
+
+                //2自己约过这种情况，认为不存在，不做处理
+                if (StringUtils.equals(msg, "已有预约，当日不能再预约")) {
+
+                    //1没到时间需要睡觉，继续往下执行循环就行，后面再约，再return，这里也不做处理
+                } else if (StringUtils.equals(msg, "方可预约")) {
+
+                    //3别人约过再约，也就是程序执行速度比手慢，这种情况是本次改造重点，
+                } else if (StringUtils.equals(msg, "当前时间预约冲突")) {
+                    //这个座位已经被占，返回预约失败，让更上一级启用备选座位
+                    return false;
+                }
+
             }
             //还没到开放预约时间，稍作等待，再做尝试
             Thread.sleep(500);
         }
-        //超时处理
+        //超时
         onReserveTimeout(user, seat);
+        //如果发生，从代码角度来说，原因未知，需要具体定位，这里先返回false，可用于启用备选seat
+        return false;
     }
 
     /**
@@ -153,7 +164,12 @@ public class AutoReserveTask {
         user.setCookie(cookie);
         List<Seat> seats = user.getSeats();
         for (Seat seat : seats) {
-            handleEachSeat(user, seat);
+            //预约一个用户的一个座位
+            boolean isSeatSuccess = handleEachSeat(user, seat);
+            //如果预约成功，就结束了。如果预约失败，继续循环，预约其它备选座位
+            if (isSeatSuccess) {
+                break;
+            }
         }
     }
 
