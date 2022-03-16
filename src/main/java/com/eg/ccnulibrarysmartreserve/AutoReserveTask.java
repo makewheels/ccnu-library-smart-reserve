@@ -41,6 +41,7 @@ public class AutoReserveTask {
      * 每天提前x秒开始
      */
     @Scheduled(cron = "55 59 17 ? * *")
+    //@Scheduled(cron = "00 47 09 ? * *")
     public void reserve() throws InterruptedException {
         HttpGlobalConfig.setTimeout(7000);
 //        JSONObject config = JSON.parseObject(System.getenv("config"));
@@ -101,7 +102,7 @@ public class AutoReserveTask {
     private boolean handleEachSeat(User user, Seat seat) throws InterruptedException {
         String username = user.getUsername();
         //最大尝试次数
-        for (int i = 1; i <= 70; i++) {
+        for (int i = 1; i <= 90; i++) {
             String currentTimeString = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(LocalDateTime.now());
 
             log.info(Thread.currentThread().getName() + " 开始预约第 " + i + " 次, "
@@ -149,7 +150,7 @@ public class AutoReserveTask {
                 onReserveSuccess(user, seat);
                 return true;
             } else {
-                //2022年3月15日20:17:30，杜继虎需求：seats备选list
+                //2022年3月15日20:17:30，需求：seats备选list
                 //首先，需要区分三种失败情况：1没到预约开放时间，2自己约过再约，3别人约过再约
 
                 String msg = reserveResponse.getMsg();
@@ -201,3 +202,4 @@ public class AutoReserveTask {
     }
 
 }
+
