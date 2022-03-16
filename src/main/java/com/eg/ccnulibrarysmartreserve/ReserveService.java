@@ -99,23 +99,4 @@ public class ReserveService {
         return JSON.parseObject(json, ReserveResponse.class);
     }
 
-    public static void main(String[] args) {
-        ReserveService reserveService = new ReserveService();
-        HttpCookie cookie = reserveService.loginAndGetCookie("2020180007", "q63zuQushMESw3V");
-        System.out.println(cookie);
-
-//        GetSeatsResponse getSeatsResponse = reserveService.getSeats(
-//                cookie, "100671221", 1);
-//        System.out.println(getSeatsResponse);
-//        List<Data> data = getSeatsResponse.getData();
-//        for (Data datum : data) {
-//            String title = datum.getTitle();
-//            String devId = datum.getDevId();
-//            System.out.println(title + " " + devId);
-//        }
-
-        ReserveResponse reserve = reserveService.reserve(cookie, "100671226",
-                1640592000000L, 1640595600000L);
-        System.out.println(reserve);
-    }
 }
