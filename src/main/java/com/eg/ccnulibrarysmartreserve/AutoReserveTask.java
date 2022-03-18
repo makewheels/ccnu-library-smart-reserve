@@ -43,7 +43,7 @@ public class AutoReserveTask {
     @Scheduled(cron = "55 59 17 ? * *")
     //@Scheduled(cron = "00 47 09 ? * *")
     public void reserve() throws InterruptedException {
-        HttpGlobalConfig.setTimeout(7000);
+        //HttpGlobalConfig.setTimeout(7000);// may be cause timeout(default off)
 //        JSONObject config = JSON.parseObject(System.getenv("config"));
 
         File configFile = new File(AutoReserveTask.class.getResource("/example-config.json").getPath());
